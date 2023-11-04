@@ -52,7 +52,9 @@ Mkfile.old
 dkms.conf
 
 # More
+*.asm
 *.ihx
 *.lst
 *.map
 *.noi
+*.sym
