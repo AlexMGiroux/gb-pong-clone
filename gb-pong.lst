@@ -1,0 +1,1535 @@
+                                      1 ;--------------------------------------------------------
+                                      2 ; File Created by SDCC : free open source ANSI-C Compiler
+                                      3 ; Version 4.0.7 #12016 (MINGW64)
+                                      4 ;--------------------------------------------------------
+                                      5 	.module gb_pong
+                                      6 	.optsdcc -mgbz80
+                                      7 	
+                                      8 ;--------------------------------------------------------
+                                      9 ; Public variables in this module
+                                     10 ;--------------------------------------------------------
+                                     11 	.globl _main
+                                     12 	.globl _set_sprite_data
+                                     13 	.globl _joypad
+                                     14 	.globl _delay
+                                     15 	.globl _puts
+                                     16 	.globl _printf
+                                     17 	.globl _clear
+                                     18 	.globl _ball
+                                     19 	.globl _paddle2
+                                     20 	.globl _paddle
+                                     21 ;--------------------------------------------------------
+                                     22 ; special function registers
+                                     23 ;--------------------------------------------------------
+                                     24 ;--------------------------------------------------------
+                                     25 ; ram data
+                                     26 ;--------------------------------------------------------
+                                     27 	.area _DATA
+      000000                         28 _paddle::
+      000000                         29 	.ds 64
+      000040                         30 _paddle2::
+      000040                         31 	.ds 64
+      000080                         32 _ball::
+      000080                         33 	.ds 16
+      000090                         34 _clear::
+      000090                         35 	.ds 16
+                                     36 ;--------------------------------------------------------
+                                     37 ; absolute external ram data
+                                     38 ;--------------------------------------------------------
+                                     39 	.area _DABS (ABS)
+                                     40 ;--------------------------------------------------------
+                                     41 ; global & static initialisations
+                                     42 ;--------------------------------------------------------
+                                     43 	.area _HOME
+                                     44 	.area _GSINIT
+                                     45 	.area _GSFINAL
+                                     46 	.area _GSINIT
+                                     47 ;gb-pong.c:5: unsigned char paddle[] =
+      000000 21r00r00                48 	ld	hl, #_paddle
+      000003 36 FF                   49 	ld	(hl), #0xff
+      000005 21r01r00                50 	ld	hl, #(_paddle + 0x0001)
+      000008 36 FF                   51 	ld	(hl), #0xff
+      00000A 21r02r00                52 	ld	hl, #(_paddle + 0x0002)
+      00000D 36 93                   53 	ld	(hl), #0x93
+      00000F 21r03r00                54 	ld	hl, #(_paddle + 0x0003)
+      000012 36 FF                   55 	ld	(hl), #0xff
+      000014 21r04r00                56 	ld	hl, #(_paddle + 0x0004)
+      000017 36 A5                   57 	ld	(hl), #0xa5
+      000019 21r05r00                58 	ld	hl, #(_paddle + 0x0005)
+      00001C 36 FF                   59 	ld	(hl), #0xff
+      00001E 21r06r00                60 	ld	hl, #(_paddle + 0x0006)
+      000021 36 C9                   61 	ld	(hl), #0xc9
+      000023 21r07r00                62 	ld	hl, #(_paddle + 0x0007)
+      000026 36 FF                   63 	ld	(hl), #0xff
+      000028 21r08r00                64 	ld	hl, #(_paddle + 0x0008)
+      00002B 36 93                   65 	ld	(hl), #0x93
+      00002D 21r09r00                66 	ld	hl, #(_paddle + 0x0009)
+      000030 36 FF                   67 	ld	(hl), #0xff
+      000032 21r0Ar00                68 	ld	hl, #(_paddle + 0x000a)
+      000035 36 A5                   69 	ld	(hl), #0xa5
+      000037 21r0Br00                70 	ld	hl, #(_paddle + 0x000b)
+      00003A 36 FF                   71 	ld	(hl), #0xff
+      00003C 21r0Cr00                72 	ld	hl, #(_paddle + 0x000c)
+      00003F 36 C9                   73 	ld	(hl), #0xc9
+      000041 21r0Dr00                74 	ld	hl, #(_paddle + 0x000d)
+      000044 36 FF                   75 	ld	(hl), #0xff
+      000046 21r0Er00                76 	ld	hl, #(_paddle + 0x000e)
+      000049 36 93                   77 	ld	(hl), #0x93
+      00004B 21r0Fr00                78 	ld	hl, #(_paddle + 0x000f)
+      00004E 36 FF                   79 	ld	(hl), #0xff
+      000050 21r10r00                80 	ld	hl, #(_paddle + 0x0010)
+      000053 36 A5                   81 	ld	(hl), #0xa5
+      000055 21r11r00                82 	ld	hl, #(_paddle + 0x0011)
+      000058 36 FF                   83 	ld	(hl), #0xff
+      00005A 21r12r00                84 	ld	hl, #(_paddle + 0x0012)
+      00005D 36 C9                   85 	ld	(hl), #0xc9
+      00005F 21r13r00                86 	ld	hl, #(_paddle + 0x0013)
+      000062 36 FF                   87 	ld	(hl), #0xff
+      000064 21r14r00                88 	ld	hl, #(_paddle + 0x0014)
+      000067 36 93                   89 	ld	(hl), #0x93
+      000069 21r15r00                90 	ld	hl, #(_paddle + 0x0015)
+      00006C 36 FF                   91 	ld	(hl), #0xff
+      00006E 21r16r00                92 	ld	hl, #(_paddle + 0x0016)
+      000071 36 A5                   93 	ld	(hl), #0xa5
+      000073 21r17r00                94 	ld	hl, #(_paddle + 0x0017)
+      000076 36 FF                   95 	ld	(hl), #0xff
+      000078 21r18r00                96 	ld	hl, #(_paddle + 0x0018)
+      00007B 36 C9                   97 	ld	(hl), #0xc9
+      00007D 21r19r00                98 	ld	hl, #(_paddle + 0x0019)
+      000080 36 FF                   99 	ld	(hl), #0xff
+      000082 21r1Ar00               100 	ld	hl, #(_paddle + 0x001a)
+      000085 36 93                  101 	ld	(hl), #0x93
+      000087 21r1Br00               102 	ld	hl, #(_paddle + 0x001b)
+      00008A 36 FF                  103 	ld	(hl), #0xff
+      00008C 21r1Cr00               104 	ld	hl, #(_paddle + 0x001c)
+      00008F 36 A5                  105 	ld	(hl), #0xa5
+      000091 21r1Dr00               106 	ld	hl, #(_paddle + 0x001d)
+      000094 36 FF                  107 	ld	(hl), #0xff
+      000096 21r1Er00               108 	ld	hl, #(_paddle + 0x001e)
+      000099 36 C9                  109 	ld	(hl), #0xc9
+      00009B 21r1Fr00               110 	ld	hl, #(_paddle + 0x001f)
+      00009E 36 FF                  111 	ld	(hl), #0xff
+      0000A0 21r20r00               112 	ld	hl, #(_paddle + 0x0020)
+      0000A3 36 93                  113 	ld	(hl), #0x93
+      0000A5 21r21r00               114 	ld	hl, #(_paddle + 0x0021)
+      0000A8 36 FF                  115 	ld	(hl), #0xff
+      0000AA 21r22r00               116 	ld	hl, #(_paddle + 0x0022)
+      0000AD 36 A5                  117 	ld	(hl), #0xa5
+      0000AF 21r23r00               118 	ld	hl, #(_paddle + 0x0023)
+      0000B2 36 FF                  119 	ld	(hl), #0xff
+      0000B4 21r24r00               120 	ld	hl, #(_paddle + 0x0024)
+      0000B7 36 C9                  121 	ld	(hl), #0xc9
+      0000B9 21r25r00               122 	ld	hl, #(_paddle + 0x0025)
+      0000BC 36 FF                  123 	ld	(hl), #0xff
+      0000BE 21r26r00               124 	ld	hl, #(_paddle + 0x0026)
+      0000C1 36 93                  125 	ld	(hl), #0x93
+      0000C3 21r27r00               126 	ld	hl, #(_paddle + 0x0027)
+      0000C6 36 FF                  127 	ld	(hl), #0xff
+      0000C8 21r28r00               128 	ld	hl, #(_paddle + 0x0028)
+      0000CB 36 A5                  129 	ld	(hl), #0xa5
+      0000CD 21r29r00               130 	ld	hl, #(_paddle + 0x0029)
+      0000D0 36 FF                  131 	ld	(hl), #0xff
+      0000D2 21r2Ar00               132 	ld	hl, #(_paddle + 0x002a)
+      0000D5 36 C9                  133 	ld	(hl), #0xc9
+      0000D7 21r2Br00               134 	ld	hl, #(_paddle + 0x002b)
+      0000DA 36 FF                  135 	ld	(hl), #0xff
+      0000DC 21r2Cr00               136 	ld	hl, #(_paddle + 0x002c)
+      0000DF 36 93                  137 	ld	(hl), #0x93
+      0000E1 21r2Dr00               138 	ld	hl, #(_paddle + 0x002d)
+      0000E4 36 FF                  139 	ld	(hl), #0xff
+      0000E6 21r2Er00               140 	ld	hl, #(_paddle + 0x002e)
+      0000E9 36 A5                  141 	ld	(hl), #0xa5
+      0000EB 21r2Fr00               142 	ld	hl, #(_paddle + 0x002f)
+      0000EE 36 FF                  143 	ld	(hl), #0xff
+      0000F0 21r30r00               144 	ld	hl, #(_paddle + 0x0030)
+      0000F3 36 C9                  145 	ld	(hl), #0xc9
+      0000F5 21r31r00               146 	ld	hl, #(_paddle + 0x0031)
+      0000F8 36 FF                  147 	ld	(hl), #0xff
+      0000FA 21r32r00               148 	ld	hl, #(_paddle + 0x0032)
+      0000FD 36 93                  149 	ld	(hl), #0x93
+      0000FF 21r33r00               150 	ld	hl, #(_paddle + 0x0033)
+      000102 36 FF                  151 	ld	(hl), #0xff
+      000104 21r34r00               152 	ld	hl, #(_paddle + 0x0034)
+      000107 36 A5                  153 	ld	(hl), #0xa5
+      000109 21r35r00               154 	ld	hl, #(_paddle + 0x0035)
+      00010C 36 FF                  155 	ld	(hl), #0xff
+      00010E 21r36r00               156 	ld	hl, #(_paddle + 0x0036)
+      000111 36 C9                  157 	ld	(hl), #0xc9
+      000113 21r37r00               158 	ld	hl, #(_paddle + 0x0037)
+      000116 36 FF                  159 	ld	(hl), #0xff
+      000118 21r38r00               160 	ld	hl, #(_paddle + 0x0038)
+      00011B 36 93                  161 	ld	(hl), #0x93
+      00011D 21r39r00               162 	ld	hl, #(_paddle + 0x0039)
+      000120 36 FF                  163 	ld	(hl), #0xff
+      000122 21r3Ar00               164 	ld	hl, #(_paddle + 0x003a)
+      000125 36 A5                  165 	ld	(hl), #0xa5
+      000127 21r3Br00               166 	ld	hl, #(_paddle + 0x003b)
+      00012A 36 FF                  167 	ld	(hl), #0xff
+      00012C 21r3Cr00               168 	ld	hl, #(_paddle + 0x003c)
+      00012F 36 C9                  169 	ld	(hl), #0xc9
+      000131 21r3Dr00               170 	ld	hl, #(_paddle + 0x003d)
+      000134 36 FF                  171 	ld	(hl), #0xff
+      000136 21r3Er00               172 	ld	hl, #(_paddle + 0x003e)
+      000139 36 FF                  173 	ld	(hl), #0xff
+      00013B 21r3Fr00               174 	ld	hl, #(_paddle + 0x003f)
+      00013E 36 FF                  175 	ld	(hl), #0xff
+                                    176 ;gb-pong.c:17: unsigned char paddle2[] =
+      000140 21r40r00               177 	ld	hl, #_paddle2
+      000143 36 FF                  178 	ld	(hl), #0xff
+      000145 21r41r00               179 	ld	hl, #(_paddle2 + 0x0001)
+      000148 36 FF                  180 	ld	(hl), #0xff
+      00014A 21r42r00               181 	ld	hl, #(_paddle2 + 0x0002)
+      00014D 36 93                  182 	ld	(hl), #0x93
+      00014F 21r43r00               183 	ld	hl, #(_paddle2 + 0x0003)
+      000152 36 FF                  184 	ld	(hl), #0xff
+      000154 21r44r00               185 	ld	hl, #(_paddle2 + 0x0004)
+      000157 36 A5                  186 	ld	(hl), #0xa5
+      000159 21r45r00               187 	ld	hl, #(_paddle2 + 0x0005)
+      00015C 36 FF                  188 	ld	(hl), #0xff
+      00015E 21r46r00               189 	ld	hl, #(_paddle2 + 0x0006)
+      000161 36 C9                  190 	ld	(hl), #0xc9
+      000163 21r47r00               191 	ld	hl, #(_paddle2 + 0x0007)
+      000166 36 FF                  192 	ld	(hl), #0xff
+      000168 21r48r00               193 	ld	hl, #(_paddle2 + 0x0008)
+      00016B 36 93                  194 	ld	(hl), #0x93
+      00016D 21r49r00               195 	ld	hl, #(_paddle2 + 0x0009)
+      000170 36 FF                  196 	ld	(hl), #0xff
+      000172 21r4Ar00               197 	ld	hl, #(_paddle2 + 0x000a)
+      000175 36 A5                  198 	ld	(hl), #0xa5
+      000177 21r4Br00               199 	ld	hl, #(_paddle2 + 0x000b)
+      00017A 36 FF                  200 	ld	(hl), #0xff
+      00017C 21r4Cr00               201 	ld	hl, #(_paddle2 + 0x000c)
+      00017F 36 C9                  202 	ld	(hl), #0xc9
+      000181 21r4Dr00               203 	ld	hl, #(_paddle2 + 0x000d)
+      000184 36 FF                  204 	ld	(hl), #0xff
+      000186 21r4Er00               205 	ld	hl, #(_paddle2 + 0x000e)
+      000189 36 93                  206 	ld	(hl), #0x93
+      00018B 21r4Fr00               207 	ld	hl, #(_paddle2 + 0x000f)
+      00018E 36 FF                  208 	ld	(hl), #0xff
+      000190 21r50r00               209 	ld	hl, #(_paddle2 + 0x0010)
+      000193 36 A5                  210 	ld	(hl), #0xa5
+      000195 21r51r00               211 	ld	hl, #(_paddle2 + 0x0011)
+      000198 36 FF                  212 	ld	(hl), #0xff
+      00019A 21r52r00               213 	ld	hl, #(_paddle2 + 0x0012)
+      00019D 36 C9                  214 	ld	(hl), #0xc9
+      00019F 21r53r00               215 	ld	hl, #(_paddle2 + 0x0013)
+      0001A2 36 FF                  216 	ld	(hl), #0xff
+      0001A4 21r54r00               217 	ld	hl, #(_paddle2 + 0x0014)
+      0001A7 36 93                  218 	ld	(hl), #0x93
+      0001A9 21r55r00               219 	ld	hl, #(_paddle2 + 0x0015)
+      0001AC 36 FF                  220 	ld	(hl), #0xff
+      0001AE 21r56r00               221 	ld	hl, #(_paddle2 + 0x0016)
+      0001B1 36 A5                  222 	ld	(hl), #0xa5
+      0001B3 21r57r00               223 	ld	hl, #(_paddle2 + 0x0017)
+      0001B6 36 FF                  224 	ld	(hl), #0xff
+      0001B8 21r58r00               225 	ld	hl, #(_paddle2 + 0x0018)
+      0001BB 36 C9                  226 	ld	(hl), #0xc9
+      0001BD 21r59r00               227 	ld	hl, #(_paddle2 + 0x0019)
+      0001C0 36 FF                  228 	ld	(hl), #0xff
+      0001C2 21r5Ar00               229 	ld	hl, #(_paddle2 + 0x001a)
+      0001C5 36 93                  230 	ld	(hl), #0x93
+      0001C7 21r5Br00               231 	ld	hl, #(_paddle2 + 0x001b)
+      0001CA 36 FF                  232 	ld	(hl), #0xff
+      0001CC 21r5Cr00               233 	ld	hl, #(_paddle2 + 0x001c)
+      0001CF 36 A5                  234 	ld	(hl), #0xa5
+      0001D1 21r5Dr00               235 	ld	hl, #(_paddle2 + 0x001d)
+      0001D4 36 FF                  236 	ld	(hl), #0xff
+      0001D6 21r5Er00               237 	ld	hl, #(_paddle2 + 0x001e)
+      0001D9 36 C9                  238 	ld	(hl), #0xc9
+      0001DB 21r5Fr00               239 	ld	hl, #(_paddle2 + 0x001f)
+      0001DE 36 FF                  240 	ld	(hl), #0xff
+      0001E0 21r60r00               241 	ld	hl, #(_paddle2 + 0x0020)
+      0001E3 36 93                  242 	ld	(hl), #0x93
+      0001E5 21r61r00               243 	ld	hl, #(_paddle2 + 0x0021)
+      0001E8 36 FF                  244 	ld	(hl), #0xff
+      0001EA 21r62r00               245 	ld	hl, #(_paddle2 + 0x0022)
+      0001ED 36 A5                  246 	ld	(hl), #0xa5
+      0001EF 21r63r00               247 	ld	hl, #(_paddle2 + 0x0023)
+      0001F2 36 FF                  248 	ld	(hl), #0xff
+      0001F4 21r64r00               249 	ld	hl, #(_paddle2 + 0x0024)
+      0001F7 36 C9                  250 	ld	(hl), #0xc9
+      0001F9 21r65r00               251 	ld	hl, #(_paddle2 + 0x0025)
+      0001FC 36 FF                  252 	ld	(hl), #0xff
+      0001FE 21r66r00               253 	ld	hl, #(_paddle2 + 0x0026)
+      000201 36 93                  254 	ld	(hl), #0x93
+      000203 21r67r00               255 	ld	hl, #(_paddle2 + 0x0027)
+      000206 36 FF                  256 	ld	(hl), #0xff
+      000208 21r68r00               257 	ld	hl, #(_paddle2 + 0x0028)
+      00020B 36 A5                  258 	ld	(hl), #0xa5
+      00020D 21r69r00               259 	ld	hl, #(_paddle2 + 0x0029)
+      000210 36 FF                  260 	ld	(hl), #0xff
+      000212 21r6Ar00               261 	ld	hl, #(_paddle2 + 0x002a)
+      000215 36 C9                  262 	ld	(hl), #0xc9
+      000217 21r6Br00               263 	ld	hl, #(_paddle2 + 0x002b)
+      00021A 36 FF                  264 	ld	(hl), #0xff
+      00021C 21r6Cr00               265 	ld	hl, #(_paddle2 + 0x002c)
+      00021F 36 93                  266 	ld	(hl), #0x93
+      000221 21r6Dr00               267 	ld	hl, #(_paddle2 + 0x002d)
+      000224 36 FF                  268 	ld	(hl), #0xff
+      000226 21r6Er00               269 	ld	hl, #(_paddle2 + 0x002e)
+      000229 36 A5                  270 	ld	(hl), #0xa5
+      00022B 21r6Fr00               271 	ld	hl, #(_paddle2 + 0x002f)
+      00022E 36 FF                  272 	ld	(hl), #0xff
+      000230 21r70r00               273 	ld	hl, #(_paddle2 + 0x0030)
+      000233 36 C9                  274 	ld	(hl), #0xc9
+      000235 21r71r00               275 	ld	hl, #(_paddle2 + 0x0031)
+      000238 36 FF                  276 	ld	(hl), #0xff
+      00023A 21r72r00               277 	ld	hl, #(_paddle2 + 0x0032)
+      00023D 36 93                  278 	ld	(hl), #0x93
+      00023F 21r73r00               279 	ld	hl, #(_paddle2 + 0x0033)
+      000242 36 FF                  280 	ld	(hl), #0xff
+      000244 21r74r00               281 	ld	hl, #(_paddle2 + 0x0034)
+      000247 36 A5                  282 	ld	(hl), #0xa5
+      000249 21r75r00               283 	ld	hl, #(_paddle2 + 0x0035)
+      00024C 36 FF                  284 	ld	(hl), #0xff
+      00024E 21r76r00               285 	ld	hl, #(_paddle2 + 0x0036)
+      000251 36 C9                  286 	ld	(hl), #0xc9
+      000253 21r77r00               287 	ld	hl, #(_paddle2 + 0x0037)
+      000256 36 FF                  288 	ld	(hl), #0xff
+      000258 21r78r00               289 	ld	hl, #(_paddle2 + 0x0038)
+      00025B 36 93                  290 	ld	(hl), #0x93
+      00025D 21r79r00               291 	ld	hl, #(_paddle2 + 0x0039)
+      000260 36 FF                  292 	ld	(hl), #0xff
+      000262 21r7Ar00               293 	ld	hl, #(_paddle2 + 0x003a)
+      000265 36 A5                  294 	ld	(hl), #0xa5
+      000267 21r7Br00               295 	ld	hl, #(_paddle2 + 0x003b)
+      00026A 36 FF                  296 	ld	(hl), #0xff
+      00026C 21r7Cr00               297 	ld	hl, #(_paddle2 + 0x003c)
+      00026F 36 C9                  298 	ld	(hl), #0xc9
+      000271 21r7Dr00               299 	ld	hl, #(_paddle2 + 0x003d)
+      000274 36 FF                  300 	ld	(hl), #0xff
+      000276 21r7Er00               301 	ld	hl, #(_paddle2 + 0x003e)
+      000279 36 FF                  302 	ld	(hl), #0xff
+      00027B 21r7Fr00               303 	ld	hl, #(_paddle2 + 0x003f)
+      00027E 36 FF                  304 	ld	(hl), #0xff
+                                    305 ;gb-pong.c:29: unsigned char ball[] =
+      000280 21r80r00               306 	ld	hl, #_ball
+      000283 36 00                  307 	ld	(hl), #0x00
+      000285 21r81r00               308 	ld	hl, #(_ball + 0x0001)
+      000288 36 00                  309 	ld	(hl), #0x00
+      00028A 21r82r00               310 	ld	hl, #(_ball + 0x0002)
+      00028D 36 3C                  311 	ld	(hl), #0x3c
+      00028F 21r83r00               312 	ld	hl, #(_ball + 0x0003)
+      000292 36 3C                  313 	ld	(hl), #0x3c
+      000294 21r84r00               314 	ld	hl, #(_ball + 0x0004)
+      000297 36 7E                  315 	ld	(hl), #0x7e
+      000299 21r85r00               316 	ld	hl, #(_ball + 0x0005)
+      00029C 36 7E                  317 	ld	(hl), #0x7e
+      00029E 21r86r00               318 	ld	hl, #(_ball + 0x0006)
+      0002A1 36 7E                  319 	ld	(hl), #0x7e
+      0002A3 21r87r00               320 	ld	hl, #(_ball + 0x0007)
+      0002A6 36 7E                  321 	ld	(hl), #0x7e
+      0002A8 21r88r00               322 	ld	hl, #(_ball + 0x0008)
+      0002AB 36 7E                  323 	ld	(hl), #0x7e
+      0002AD 21r89r00               324 	ld	hl, #(_ball + 0x0009)
+      0002B0 36 7E                  325 	ld	(hl), #0x7e
+      0002B2 21r8Ar00               326 	ld	hl, #(_ball + 0x000a)
+      0002B5 36 7E                  327 	ld	(hl), #0x7e
+      0002B7 21r8Br00               328 	ld	hl, #(_ball + 0x000b)
+      0002BA 36 7E                  329 	ld	(hl), #0x7e
+      0002BC 21r8Cr00               330 	ld	hl, #(_ball + 0x000c)
+      0002BF 36 3C                  331 	ld	(hl), #0x3c
+      0002C1 21r8Dr00               332 	ld	hl, #(_ball + 0x000d)
+      0002C4 36 3C                  333 	ld	(hl), #0x3c
+      0002C6 21r8Er00               334 	ld	hl, #(_ball + 0x000e)
+      0002C9 36 00                  335 	ld	(hl), #0x00
+      0002CB 21r8Fr00               336 	ld	hl, #(_ball + 0x000f)
+      0002CE 36 00                  337 	ld	(hl), #0x00
+                                    338 ;gb-pong.c:35: unsigned char clear[] =
+      0002D0 21r90r00               339 	ld	hl, #_clear
+      0002D3 36 00                  340 	ld	(hl), #0x00
+      0002D5 21r91r00               341 	ld	hl, #(_clear + 0x0001)
+      0002D8 36 00                  342 	ld	(hl), #0x00
+      0002DA 21r92r00               343 	ld	hl, #(_clear + 0x0002)
+      0002DD 36 00                  344 	ld	(hl), #0x00
+      0002DF 21r93r00               345 	ld	hl, #(_clear + 0x0003)
+      0002E2 36 00                  346 	ld	(hl), #0x00
+      0002E4 21r94r00               347 	ld	hl, #(_clear + 0x0004)
+      0002E7 36 00                  348 	ld	(hl), #0x00
+      0002E9 21r95r00               349 	ld	hl, #(_clear + 0x0005)
+      0002EC 36 00                  350 	ld	(hl), #0x00
+      0002EE 21r96r00               351 	ld	hl, #(_clear + 0x0006)
+      0002F1 36 00                  352 	ld	(hl), #0x00
+      0002F3 21r97r00               353 	ld	hl, #(_clear + 0x0007)
+      0002F6 36 00                  354 	ld	(hl), #0x00
+      0002F8 21r98r00               355 	ld	hl, #(_clear + 0x0008)
+      0002FB 36 00                  356 	ld	(hl), #0x00
+      0002FD 21r99r00               357 	ld	hl, #(_clear + 0x0009)
+      000300 36 00                  358 	ld	(hl), #0x00
+      000302 21r9Ar00               359 	ld	hl, #(_clear + 0x000a)
+      000305 36 00                  360 	ld	(hl), #0x00
+      000307 21r9Br00               361 	ld	hl, #(_clear + 0x000b)
+      00030A 36 00                  362 	ld	(hl), #0x00
+      00030C 21r9Cr00               363 	ld	hl, #(_clear + 0x000c)
+      00030F 36 00                  364 	ld	(hl), #0x00
+      000311 21r9Dr00               365 	ld	hl, #(_clear + 0x000d)
+      000314 36 00                  366 	ld	(hl), #0x00
+      000316 21r9Er00               367 	ld	hl, #(_clear + 0x000e)
+      000319 36 00                  368 	ld	(hl), #0x00
+      00031B 21r9Fr00               369 	ld	hl, #(_clear + 0x000f)
+      00031E 36 00                  370 	ld	(hl), #0x00
+                                    371 ;--------------------------------------------------------
+                                    372 ; Home
+                                    373 ;--------------------------------------------------------
+                                    374 	.area _HOME
+                                    375 	.area _HOME
+                                    376 ;--------------------------------------------------------
+                                    377 ; code
+                                    378 ;--------------------------------------------------------
+                                    379 	.area _CODE
+                                    380 ;gb-pong.c:41: void main()
+                                    381 ;	---------------------------------
+                                    382 ; Function main
+                                    383 ; ---------------------------------
+      000000                        384 _main::
+      000000 E8 EE                  385 	add	sp, #-18
+                                    386 ;gb-pong.c:43: NR52_REG = 0x80;
+      000002 3E 80                  387 	ld	a, #0x80
+      000004 E0r00                  388 	ldh	(_NR52_REG+0),a
+                                    389 ;gb-pong.c:44: NR50_REG = 0x77;
+      000006 3E 77                  390 	ld	a, #0x77
+      000008 E0r00                  391 	ldh	(_NR50_REG+0),a
+                                    392 ;gb-pong.c:45: NR51_REG = 0xFF;
+      00000A 3E FF                  393 	ld	a, #0xff
+      00000C E0r00                  394 	ldh	(_NR51_REG+0),a
+                                    395 ;gb-pong.c:49: printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+      00000E 21r63r05               396 	ld	hl, #___str_1
+      000011 E5                     397 	push	hl
+      000012 CDr00r00               398 	call	_puts
+      000015 E8 02                  399 	add	sp, #2
+                                    400 ;gb-pong.c:50: printf(" %d               %d\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", yourScore, oppScore);
+      000017 21 00 00               401 	ld	hl, #0x0000
+      00001A E5                     402 	push	hl
+      00001B 6C                     403 	ld	l, h
+      00001C E5                     404 	push	hl
+      00001D 21r75r05               405 	ld	hl, #___str_2
+      000020 E5                     406 	push	hl
+      000021 CDr00r00               407 	call	_printf
+      000024 E8 06                  408 	add	sp, #6
+                                    409 ;gb-pong.c:52: bool ballRight = TRUE;
+      000026 F8 00                  410 	ldhl	sp,	#0
+                                    411 ;gb-pong.c:53: bool ballUp = TRUE;
+                                    412 ;gb-pong.c:56: int y = 75;
+      000028 3E 01                  413 	ld	a,#0x01
+      00002A 22                     414 	ld	(hl+),a
+      00002B 22                     415 	ld	(hl+), a
+      00002C 36 4B                  416 	ld	(hl), #0x4b
+      00002E AF                     417 	xor	a, a
+      00002F 23                     418 	inc	hl
+      000030 77                     419 	ld	(hl), a
+                                    420 ;gb-pong.c:59: int oppy = 75;
+      000031 F8 08                  421 	ldhl	sp,	#8
+      000033 36 4B                  422 	ld	(hl), #0x4b
+      000035 AF                     423 	xor	a, a
+      000036 23                     424 	inc	hl
+                                    425 ;gb-pong.c:61: int ballx = 85;
+      000037 22                     426 	ld	(hl+), a
+      000038 36 55                  427 	ld	(hl), #0x55
+      00003A AF                     428 	xor	a, a
+      00003B 23                     429 	inc	hl
+                                    430 ;gb-pong.c:62: int bally = 75;
+      00003C 22                     431 	ld	(hl+), a
+      00003D 36 4B                  432 	ld	(hl), #0x4b
+      00003F AF                     433 	xor	a, a
+      000040 23                     434 	inc	hl
+      000041 77                     435 	ld	(hl), a
+                                    436 ;gb-pong.c:64: SPRITES_8x16;
+      000042 F0r00                  437 	ldh	a, (_LCDC_REG+0)
+      000044 F6 04                  438 	or	a, #0x04
+      000046 E0r00                  439 	ldh	(_LCDC_REG+0),a
+                                    440 ;gb-pong.c:65: set_sprite_data(0, 8, paddle);
+      000048 21r00r00               441 	ld	hl, #_paddle
+      00004B E5                     442 	push	hl
+      00004C 3E 08                  443 	ld	a, #0x08
+      00004E F5                     444 	push	af
+      00004F 33                     445 	inc	sp
+      000050 AF                     446 	xor	a, a
+      000051 F5                     447 	push	af
+      000052 33                     448 	inc	sp
+      000053 CDr00r00               449 	call	_set_sprite_data
+      000056 E8 04                  450 	add	sp, #4
+                                    451 ;c:/gbdk/include/gb/gb.h:1004: shadow_OAM[nb].tile=tile;
+      000058 21r02r00               452 	ld	hl, #(_shadow_OAM + 0x0002)
+      00005B 36 00                  453 	ld	(hl), #0x00
+                                    454 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+      00005D 21r00r00               455 	ld	hl, #_shadow_OAM
+                                    456 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      000060 3E 4B                  457 	ld	a, #0x4b
+      000062 22                     458 	ld	(hl+), a
+      000063 36 0F                  459 	ld	(hl), #0x0f
+                                    460 ;c:/gbdk/include/gb/gb.h:1004: shadow_OAM[nb].tile=tile;
+      000065 21r06r00               461 	ld	hl, #(_shadow_OAM + 0x0006)
+      000068 36 06                  462 	ld	(hl), #0x06
+                                    463 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+      00006A 21r04r00               464 	ld	hl, #(_shadow_OAM + 0x0004)
+                                    465 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      00006D 3E 5B                  466 	ld	a, #0x5b
+      00006F 22                     467 	ld	(hl+), a
+      000070 36 0F                  468 	ld	(hl), #0x0f
+                                    469 ;c:/gbdk/include/gb/gb.h:1004: shadow_OAM[nb].tile=tile;
+      000072 21r0Ar00               470 	ld	hl, #(_shadow_OAM + 0x000a)
+      000075 36 00                  471 	ld	(hl), #0x00
+                                    472 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+      000077 21r08r00               473 	ld	hl, #(_shadow_OAM + 0x0008)
+                                    474 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      00007A 3E 4B                  475 	ld	a, #0x4b
+      00007C 22                     476 	ld	(hl+), a
+      00007D 36 96                  477 	ld	(hl), #0x96
+                                    478 ;c:/gbdk/include/gb/gb.h:1004: shadow_OAM[nb].tile=tile;
+      00007F 21r0Er00               479 	ld	hl, #(_shadow_OAM + 0x000e)
+      000082 36 06                  480 	ld	(hl), #0x06
+                                    481 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+      000084 21r0Cr00               482 	ld	hl, #(_shadow_OAM + 0x000c)
+                                    483 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      000087 3E 5B                  484 	ld	a, #0x5b
+      000089 22                     485 	ld	(hl+), a
+      00008A 36 96                  486 	ld	(hl), #0x96
+                                    487 ;gb-pong.c:76: set_sprite_data(10, 1, ball);
+      00008C 21r80r00               488 	ld	hl, #_ball
+      00008F E5                     489 	push	hl
+      000090 11 0A 01               490 	ld	de, #0x010a
+      000093 D5                     491 	push	de
+      000094 CDr00r00               492 	call	_set_sprite_data
+      000097 E8 04                  493 	add	sp, #4
+                                    494 ;gb-pong.c:77: set_sprite_data(0x0B, 1, clear);
+      000099 21r90r00               495 	ld	hl, #_clear
+      00009C E5                     496 	push	hl
+      00009D 3E 01                  497 	ld	a, #0x01
+      00009F 57                     498 	ld	d,a
+      0000A0 1E 0B                  499 	ld	e,#0x0b
+      0000A2 D5                     500 	push	de
+      0000A3 CDr00r00               501 	call	_set_sprite_data
+      0000A6 E8 04                  502 	add	sp, #4
+                                    503 ;c:/gbdk/include/gb/gb.h:1004: shadow_OAM[nb].tile=tile;
+      0000A8 21r12r00               504 	ld	hl, #(_shadow_OAM + 0x0012)
+      0000AB 36 0A                  505 	ld	(hl), #0x0a
+                                    506 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+      0000AD 21r10r00               507 	ld	hl, #(_shadow_OAM + 0x0010)
+                                    508 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      0000B0 3E 4B                  509 	ld	a, #0x4b
+      0000B2 22                     510 	ld	(hl+), a
+      0000B3 36 55                  511 	ld	(hl), #0x55
+                                    512 ;gb-pong.c:81: SHOW_SPRITES;
+      0000B5 F0r00                  513 	ldh	a, (_LCDC_REG+0)
+      0000B7 F6 02                  514 	or	a, #0x02
+      0000B9 E0r00                  515 	ldh	(_LCDC_REG+0),a
+                                    516 ;gb-pong.c:83: while(1)
+      0000BB AF                     517 	xor	a, a
+      0000BC F8 0E                  518 	ldhl	sp,	#14
+      0000BE 22                     519 	ld	(hl+), a
+      0000BF 77                     520 	ld	(hl), a
+      0000C0 AF                     521 	xor	a, a
+      0000C1 23                     522 	inc	hl
+      0000C2 22                     523 	ld	(hl+), a
+      0000C3 77                     524 	ld	(hl), a
+      0000C4                        525 00153$:
+                                    526 ;gb-pong.c:88: move_sprite(4, ballx, bally);
+      0000C4 F8 0C                  527 	ldhl	sp,	#12
+      0000C6 4E                     528 	ld	c, (hl)
+                                    529 ;gb-pong.c:85: if (ballRight)
+      0000C7 F8 00                  530 	ldhl	sp,	#0
+      0000C9 CB 46                  531 	bit	0, (hl)
+      0000CB 28 12                  532 	jr	Z, 00102$
+                                    533 ;gb-pong.c:87: ballx++;
+      0000CD F8 0A                  534 	ldhl	sp,	#10
+      0000CF 34                     535 	inc	(hl)
+      0000D0 20 02                  536 	jr	NZ, 00351$
+      0000D2 23                     537 	inc	hl
+      0000D3 34                     538 	inc	(hl)
+      0000D4                        539 00351$:
+                                    540 ;gb-pong.c:88: move_sprite(4, ballx, bally);
+      0000D4 F8 0A                  541 	ldhl	sp,	#10
+      0000D6 46                     542 	ld	b, (hl)
+                                    543 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+      0000D7 21r10r00               544 	ld	hl, #(_shadow_OAM + 0x0010)
+                                    545 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      0000DA 79                     546 	ld	a, c
+      0000DB 22                     547 	ld	(hl+), a
+      0000DC 70                     548 	ld	(hl), b
+                                    549 ;gb-pong.c:88: move_sprite(4, ballx, bally);
+      0000DD 18 12                  550 	jr	00103$
+      0000DF                        551 00102$:
+                                    552 ;gb-pong.c:92: ballx--;
+      0000DF F8 0A                  553 	ldhl	sp,#10
+      0000E1 2A                     554 	ld	a, (hl+)
+      0000E2 5F                     555 	ld	e, a
+      0000E3 56                     556 	ld	d, (hl)
+      0000E4 1B                     557 	dec	de
+      0000E5 2B                     558 	dec	hl
+      0000E6 7B                     559 	ld	a, e
+      0000E7 22                     560 	ld	(hl+), a
+                                    561 ;gb-pong.c:93: move_sprite(4, ballx, bally);
+      0000E8 7A                     562 	ld	a, d
+      0000E9 32                     563 	ld	(hl-), a
+      0000EA 46                     564 	ld	b, (hl)
+                                    565 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+      0000EB 21r10r00               566 	ld	hl, #(_shadow_OAM + 0x0010)
+                                    567 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      0000EE 79                     568 	ld	a, c
+      0000EF 22                     569 	ld	(hl+), a
+      0000F0 70                     570 	ld	(hl), b
+                                    571 ;gb-pong.c:93: move_sprite(4, ballx, bally);
+      0000F1                        572 00103$:
+                                    573 ;gb-pong.c:88: move_sprite(4, ballx, bally);
+      0000F1 F8 0A                  574 	ldhl	sp,	#10
+      0000F3 4E                     575 	ld	c, (hl)
+                                    576 ;gb-pong.c:96: if (ballUp)
+      0000F4 F8 01                  577 	ldhl	sp,	#1
+      0000F6 CB 46                  578 	bit	0, (hl)
+      0000F8 28 14                  579 	jr	Z, 00105$
+                                    580 ;gb-pong.c:98: bally -= 2;
+      0000FA F8 0C                  581 	ldhl	sp,#12
+      0000FC 2A                     582 	ld	a, (hl+)
+      0000FD 5F                     583 	ld	e, a
+      0000FE 56                     584 	ld	d, (hl)
+      0000FF 1B                     585 	dec	de
+      000100 1B                     586 	dec	de
+      000101 2B                     587 	dec	hl
+      000102 7B                     588 	ld	a, e
+      000103 22                     589 	ld	(hl+), a
+                                    590 ;gb-pong.c:99: move_sprite(4, ballx, bally);
+      000104 7A                     591 	ld	a, d
+      000105 32                     592 	ld	(hl-), a
+                                    593 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+                                    594 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      000106 7E                     595 	ld	a, (hl)
+      000107 21r10r00               596 	ld	hl, #(_shadow_OAM + 0x0010)
+      00010A 22                     597 	ld	(hl+), a
+      00010B 71                     598 	ld	(hl), c
+                                    599 ;gb-pong.c:99: move_sprite(4, ballx, bally);
+      00010C 18 19                  600 	jr	00106$
+      00010E                        601 00105$:
+                                    602 ;gb-pong.c:103: bally += 2;
+                                    603 ;c
+      00010E F8 0C                  604 	ldhl	sp,#12
+      000110 2A                     605 	ld	a, (hl+)
+      000111 5F                     606 	ld	e, a
+      000112 56                     607 	ld	d, (hl)
+      000113 21 02 00               608 	ld	hl, #0x0002
+      000116 19                     609 	add	hl, de
+      000117 E5                     610 	push	hl
+      000118 7D                     611 	ld	a, l
+      000119 F8 0E                  612 	ldhl	sp,	#14
+      00011B 77                     613 	ld	(hl), a
+      00011C E1                     614 	pop	hl
+      00011D 7C                     615 	ld	a, h
+      00011E F8 0D                  616 	ldhl	sp,	#13
+                                    617 ;gb-pong.c:104: move_sprite(4, ballx, bally);
+      000120 32                     618 	ld	(hl-), a
+                                    619 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+                                    620 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      000121 7E                     621 	ld	a, (hl)
+      000122 21r10r00               622 	ld	hl, #(_shadow_OAM + 0x0010)
+      000125 22                     623 	ld	(hl+), a
+      000126 71                     624 	ld	(hl), c
+                                    625 ;gb-pong.c:104: move_sprite(4, ballx, bally);
+      000127                        626 00106$:
+                                    627 ;gb-pong.c:124: ballRight = !ballRight;
+      000127 F8 00                  628 	ldhl	sp,	#0
+      000129 7E                     629 	ld	a, (hl)
+      00012A EE 01                  630 	xor	a, #0x01
+      00012C F8 07                  631 	ldhl	sp,	#7
+      00012E 77                     632 	ld	(hl), a
+                                    633 ;gb-pong.c:107: if(ballx > oppx - 6)
+      00012F F8 0A                  634 	ldhl	sp,	#10
+      000131 3E 90                  635 	ld	a, #0x90
+      000133 96                     636 	sub	a, (hl)
+      000134 23                     637 	inc	hl
+      000135 3E 00                  638 	ld	a, #0x00
+      000137 9E                     639 	sbc	a, (hl)
+      000138 3E 00                  640 	ld	a, #0x00
+      00013A 57                     641 	ld	d, a
+      00013B CB 7E                  642 	bit	7, (hl)
+      00013D 28 07                  643 	jr	Z, 00352$
+      00013F CB 7A                  644 	bit	7, d
+      000141 20 08                  645 	jr	NZ, 00353$
+      000143 BF                     646 	cp	a, a
+      000144 18 05                  647 	jr	00353$
+      000146                        648 00352$:
+      000146 CB 7A                  649 	bit	7, d
+      000148 28 01                  650 	jr	Z, 00353$
+      00014A 37                     651 	scf
+      00014B                        652 00353$:
+      00014B D2r1Br02               653 	jp	NC, 00120$
+                                    654 ;gb-pong.c:109: if(bally < oppy + 30 && bally > oppy - 8)
+                                    655 ;c
+      00014E F8 08                  656 	ldhl	sp,#8
+      000150 2A                     657 	ld	a, (hl+)
+      000151 5F                     658 	ld	e, a
+      000152 56                     659 	ld	d, (hl)
+      000153 21 1E 00               660 	ld	hl, #0x001e
+      000156 19                     661 	add	hl, de
+      000157 4D                     662 	ld	c, l
+      000158 44                     663 	ld	b, h
+      000159 F8 0C                  664 	ldhl	sp,	#12
+      00015B 7E                     665 	ld	a, (hl)
+      00015C 91                     666 	sub	a, c
+      00015D 23                     667 	inc	hl
+      00015E 7E                     668 	ld	a, (hl)
+      00015F 98                     669 	sbc	a, b
+      000160 56                     670 	ld	d, (hl)
+      000161 78                     671 	ld	a, b
+      000162 CB 7F                  672 	bit	7,a
+      000164 28 07                  673 	jr	Z, 00354$
+      000166 CB 7A                  674 	bit	7, d
+      000168 20 08                  675 	jr	NZ, 00355$
+      00016A BF                     676 	cp	a, a
+      00016B 18 05                  677 	jr	00355$
+      00016D                        678 00354$:
+      00016D CB 7A                  679 	bit	7, d
+      00016F 28 01                  680 	jr	Z, 00355$
+      000171 37                     681 	scf
+      000172                        682 00355$:
+      000172 30 45                  683 	jr	NC, 00109$
+      000174 F8 08                  684 	ldhl	sp,#8
+      000176 2A                     685 	ld	a, (hl+)
+      000177 5F                     686 	ld	e, a
+      000178 56                     687 	ld	d, (hl)
+      000179 21 08 00               688 	ld	hl, #0x0008
+      00017C 7B                     689 	ld	a, e
+      00017D 95                     690 	sub	a, l
+      00017E 5F                     691 	ld	e, a
+      00017F 7A                     692 	ld	a, d
+      000180 9C                     693 	sbc	a, h
+      000181 47                     694 	ld	b, a
+      000182 4B                     695 	ld	c, e
+      000183 F8 0C                  696 	ldhl	sp,	#12
+      000185 79                     697 	ld	a, c
+      000186 96                     698 	sub	a, (hl)
+      000187 23                     699 	inc	hl
+      000188 78                     700 	ld	a, b
+      000189 9E                     701 	sbc	a, (hl)
+      00018A 78                     702 	ld	a, b
+      00018B 57                     703 	ld	d, a
+      00018C CB 7E                  704 	bit	7, (hl)
+      00018E 28 07                  705 	jr	Z, 00356$
+      000190 CB 7A                  706 	bit	7, d
+      000192 20 08                  707 	jr	NZ, 00357$
+      000194 BF                     708 	cp	a, a
+      000195 18 05                  709 	jr	00357$
+      000197                        710 00356$:
+      000197 CB 7A                  711 	bit	7, d
+      000199 28 01                  712 	jr	Z, 00357$
+      00019B 37                     713 	scf
+      00019C                        714 00357$:
+      00019C 30 1B                  715 	jr	NC, 00109$
+                                    716 ;gb-pong.c:111: ballRight = FALSE;
+      00019E AF                     717 	xor	a, a
+      00019F F8 00                  718 	ldhl	sp,	#0
+      0001A1 77                     719 	ld	(hl), a
+                                    720 ;gb-pong.c:113: NR10_REG = 0x7E;
+      0001A2 3E 7E                  721 	ld	a, #0x7e
+      0001A4 E0r00                  722 	ldh	(_NR10_REG+0),a
+                                    723 ;gb-pong.c:114: NR11_REG = 0xC1;
+      0001A6 3E C1                  724 	ld	a, #0xc1
+      0001A8 E0r00                  725 	ldh	(_NR11_REG+0),a
+                                    726 ;gb-pong.c:115: NR12_REG = 0x66;
+      0001AA 3E 66                  727 	ld	a, #0x66
+      0001AC E0r00                  728 	ldh	(_NR12_REG+0),a
+                                    729 ;gb-pong.c:116: NR13_REG = 0x7C;
+      0001AE 3E 7C                  730 	ld	a, #0x7c
+      0001B0 E0r00                  731 	ldh	(_NR13_REG+0),a
+                                    732 ;gb-pong.c:117: NR14_REG = 0xC6;
+      0001B2 3E C6                  733 	ld	a, #0xc6
+      0001B4 E0r00                  734 	ldh	(_NR14_REG+0),a
+      0001B6 C3r05r03               735 	jp	00121$
+      0001B9                        736 00109$:
+                                    737 ;gb-pong.c:121: ballx = 85;
+      0001B9 F8 0A                  738 	ldhl	sp,	#10
+      0001BB 36 55                  739 	ld	(hl), #0x55
+      0001BD AF                     740 	xor	a, a
+      0001BE 23                     741 	inc	hl
+                                    742 ;gb-pong.c:122: bally = 75;
+      0001BF 22                     743 	ld	(hl+), a
+      0001C0 36 4B                  744 	ld	(hl), #0x4b
+      0001C2 AF                     745 	xor	a, a
+      0001C3 23                     746 	inc	hl
+                                    747 ;gb-pong.c:123: yourScore++;
+      0001C4 22                     748 	ld	(hl+), a
+      0001C5 34                     749 	inc	(hl)
+      0001C6 20 02                  750 	jr	NZ, 00358$
+      0001C8 23                     751 	inc	hl
+      0001C9 34                     752 	inc	(hl)
+      0001CA                        753 00358$:
+                                    754 ;gb-pong.c:124: ballRight = !ballRight;
+      0001CA F8 07                  755 	ldhl	sp,	#7
+      0001CC 7E                     756 	ld	a, (hl)
+      0001CD F8 00                  757 	ldhl	sp,	#0
+      0001CF 77                     758 	ld	(hl), a
+                                    759 ;gb-pong.c:127: for(i = 0; i < 5; i++)
+      0001D0 01 00 00               760 	ld	bc, #0x0000
+      0001D3                        761 00181$:
+                                    762 ;gb-pong.c:129: NR21_REG = 0x81;
+      0001D3 3E 81                  763 	ld	a, #0x81
+      0001D5 E0r00                  764 	ldh	(_NR21_REG+0),a
+                                    765 ;gb-pong.c:130: NR22_REG = 0xA6;
+      0001D7 3E A6                  766 	ld	a, #0xa6
+      0001D9 E0r00                  767 	ldh	(_NR22_REG+0),a
+                                    768 ;gb-pong.c:131: NR23_REG = 0x37;
+      0001DB 3E 37                  769 	ld	a, #0x37
+      0001DD E0r00                  770 	ldh	(_NR23_REG+0),a
+                                    771 ;gb-pong.c:132: NR24_REG = 0x87;
+      0001DF 3E 87                  772 	ld	a, #0x87
+      0001E1 E0r00                  773 	ldh	(_NR24_REG+0),a
+                                    774 ;gb-pong.c:133: delay(180);
+      0001E3 C5                     775 	push	bc
+      0001E4 21 B4 00               776 	ld	hl, #0x00b4
+      0001E7 E5                     777 	push	hl
+      0001E8 CDr00r00               778 	call	_delay
+      0001EB E8 02                  779 	add	sp, #2
+      0001ED C1                     780 	pop	bc
+                                    781 ;gb-pong.c:127: for(i = 0; i < 5; i++)
+      0001EE 03                     782 	inc	bc
+      0001EF 79                     783 	ld	a, c
+      0001F0 D6 05                  784 	sub	a, #0x05
+      0001F2 78                     785 	ld	a, b
+      0001F3 17                     786 	rla
+      0001F4 3F                     787 	ccf
+      0001F5 1F                     788 	rra
+      0001F6 DE 80                  789 	sbc	a, #0x80
+      0001F8 38 D9                  790 	jr	C, 00181$
+                                    791 ;gb-pong.c:136: printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+      0001FA 21r63r05               792 	ld	hl, #___str_1
+      0001FD E5                     793 	push	hl
+      0001FE CDr00r00               794 	call	_puts
+      000201 E8 02                  795 	add	sp, #2
+                                    796 ;gb-pong.c:137: printf(" %d               %d\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", yourScore, oppScore);
+      000203 F8 10                  797 	ldhl	sp,	#16
+      000205 2A                     798 	ld	a, (hl+)
+      000206 66                     799 	ld	h, (hl)
+      000207 6F                     800 	ld	l, a
+      000208 E5                     801 	push	hl
+      000209 F8 10                  802 	ldhl	sp,	#16
+      00020B 2A                     803 	ld	a, (hl+)
+      00020C 66                     804 	ld	h, (hl)
+      00020D 6F                     805 	ld	l, a
+      00020E E5                     806 	push	hl
+      00020F 21r75r05               807 	ld	hl, #___str_2
+      000212 E5                     808 	push	hl
+      000213 CDr00r00               809 	call	_printf
+      000216 E8 06                  810 	add	sp, #6
+      000218 C3r05r03               811 	jp	00121$
+      00021B                        812 00120$:
+                                    813 ;gb-pong.c:140: else if(ballx < x + 6)
+      00021B F8 0A                  814 	ldhl	sp,	#10
+      00021D 7E                     815 	ld	a, (hl)
+      00021E D6 15                  816 	sub	a, #0x15
+      000220 23                     817 	inc	hl
+      000221 7E                     818 	ld	a, (hl)
+      000222 DE 00                  819 	sbc	a, #0x00
+      000224 56                     820 	ld	d, (hl)
+      000225 3E 00                  821 	ld	a, #0x00
+      000227 CB 7F                  822 	bit	7,a
+      000229 28 07                  823 	jr	Z, 00359$
+      00022B CB 7A                  824 	bit	7, d
+      00022D 20 08                  825 	jr	NZ, 00360$
+      00022F BF                     826 	cp	a, a
+      000230 18 05                  827 	jr	00360$
+      000232                        828 00359$:
+      000232 CB 7A                  829 	bit	7, d
+      000234 28 01                  830 	jr	Z, 00360$
+      000236 37                     831 	scf
+      000237                        832 00360$:
+      000237 D2r05r03               833 	jp	NC, 00121$
+                                    834 ;gb-pong.c:142: if(bally < y + 30 && bally > y - 8)
+                                    835 ;c
+      00023A F8 02                  836 	ldhl	sp,#2
+      00023C 2A                     837 	ld	a, (hl+)
+      00023D 5F                     838 	ld	e, a
+      00023E 56                     839 	ld	d, (hl)
+      00023F 21 1E 00               840 	ld	hl, #0x001e
+      000242 19                     841 	add	hl, de
+      000243 4D                     842 	ld	c, l
+      000244 44                     843 	ld	b, h
+      000245 F8 0C                  844 	ldhl	sp,	#12
+      000247 7E                     845 	ld	a, (hl)
+      000248 91                     846 	sub	a, c
+      000249 23                     847 	inc	hl
+      00024A 7E                     848 	ld	a, (hl)
+      00024B 98                     849 	sbc	a, b
+      00024C 56                     850 	ld	d, (hl)
+      00024D 78                     851 	ld	a, b
+      00024E CB 7F                  852 	bit	7,a
+      000250 28 07                  853 	jr	Z, 00361$
+      000252 CB 7A                  854 	bit	7, d
+      000254 20 08                  855 	jr	NZ, 00362$
+      000256 BF                     856 	cp	a, a
+      000257 18 05                  857 	jr	00362$
+      000259                        858 00361$:
+      000259 CB 7A                  859 	bit	7, d
+      00025B 28 01                  860 	jr	Z, 00362$
+      00025D 37                     861 	scf
+      00025E                        862 00362$:
+      00025E 30 44                  863 	jr	NC, 00114$
+      000260 F8 02                  864 	ldhl	sp,#2
+      000262 2A                     865 	ld	a, (hl+)
+      000263 5F                     866 	ld	e, a
+      000264 56                     867 	ld	d, (hl)
+      000265 21 08 00               868 	ld	hl, #0x0008
+      000268 7B                     869 	ld	a, e
+      000269 95                     870 	sub	a, l
+      00026A 5F                     871 	ld	e, a
+      00026B 7A                     872 	ld	a, d
+      00026C 9C                     873 	sbc	a, h
+      00026D 47                     874 	ld	b, a
+      00026E 4B                     875 	ld	c, e
+      00026F F8 0C                  876 	ldhl	sp,	#12
+      000271 79                     877 	ld	a, c
+      000272 96                     878 	sub	a, (hl)
+      000273 23                     879 	inc	hl
+      000274 78                     880 	ld	a, b
+      000275 9E                     881 	sbc	a, (hl)
+      000276 78                     882 	ld	a, b
+      000277 57                     883 	ld	d, a
+      000278 CB 7E                  884 	bit	7, (hl)
+      00027A 28 07                  885 	jr	Z, 00363$
+      00027C CB 7A                  886 	bit	7, d
+      00027E 20 08                  887 	jr	NZ, 00364$
+      000280 BF                     888 	cp	a, a
+      000281 18 05                  889 	jr	00364$
+      000283                        890 00363$:
+      000283 CB 7A                  891 	bit	7, d
+      000285 28 01                  892 	jr	Z, 00364$
+      000287 37                     893 	scf
+      000288                        894 00364$:
+      000288 30 1A                  895 	jr	NC, 00114$
+                                    896 ;gb-pong.c:144: ballRight = TRUE;
+      00028A F8 00                  897 	ldhl	sp,	#0
+      00028C 36 01                  898 	ld	(hl), #0x01
+                                    899 ;gb-pong.c:146: NR10_REG = 0x7E;
+      00028E 3E 7E                  900 	ld	a, #0x7e
+      000290 E0r00                  901 	ldh	(_NR10_REG+0),a
+                                    902 ;gb-pong.c:147: NR11_REG = 0xC1;
+      000292 3E C1                  903 	ld	a, #0xc1
+      000294 E0r00                  904 	ldh	(_NR11_REG+0),a
+                                    905 ;gb-pong.c:148: NR12_REG = 0x66;
+      000296 3E 66                  906 	ld	a, #0x66
+      000298 E0r00                  907 	ldh	(_NR12_REG+0),a
+                                    908 ;gb-pong.c:149: NR13_REG = 0x7C;
+      00029A 3E 7C                  909 	ld	a, #0x7c
+      00029C E0r00                  910 	ldh	(_NR13_REG+0),a
+                                    911 ;gb-pong.c:150: NR14_REG = 0xC6;
+      00029E 3E C6                  912 	ld	a, #0xc6
+      0002A0 E0r00                  913 	ldh	(_NR14_REG+0),a
+      0002A2 18 61                  914 	jr	00121$
+      0002A4                        915 00114$:
+                                    916 ;gb-pong.c:154: ballx = 85;
+      0002A4 F8 0A                  917 	ldhl	sp,	#10
+      0002A6 36 55                  918 	ld	(hl), #0x55
+      0002A8 AF                     919 	xor	a, a
+      0002A9 23                     920 	inc	hl
+                                    921 ;gb-pong.c:155: bally = 75;
+      0002AA 22                     922 	ld	(hl+), a
+      0002AB 36 4B                  923 	ld	(hl), #0x4b
+      0002AD AF                     924 	xor	a, a
+      0002AE 23                     925 	inc	hl
+      0002AF 77                     926 	ld	(hl), a
+                                    927 ;gb-pong.c:156: oppScore++;
+      0002B0 F8 10                  928 	ldhl	sp,	#16
+      0002B2 34                     929 	inc	(hl)
+      0002B3 20 02                  930 	jr	NZ, 00365$
+      0002B5 23                     931 	inc	hl
+      0002B6 34                     932 	inc	(hl)
+      0002B7                        933 00365$:
+                                    934 ;gb-pong.c:157: ballRight = !ballRight;
+      0002B7 F8 07                  935 	ldhl	sp,	#7
+      0002B9 7E                     936 	ld	a, (hl)
+      0002BA F8 00                  937 	ldhl	sp,	#0
+      0002BC 77                     938 	ld	(hl), a
+                                    939 ;gb-pong.c:160: for(i = 0; i < 5; i++)
+      0002BD 01 00 00               940 	ld	bc, #0x0000
+      0002C0                        941 00183$:
+                                    942 ;gb-pong.c:162: NR21_REG = 0x81;
+      0002C0 3E 81                  943 	ld	a, #0x81
+      0002C2 E0r00                  944 	ldh	(_NR21_REG+0),a
+                                    945 ;gb-pong.c:163: NR22_REG = 0xA6;
+      0002C4 3E A6                  946 	ld	a, #0xa6
+      0002C6 E0r00                  947 	ldh	(_NR22_REG+0),a
+                                    948 ;gb-pong.c:164: NR23_REG = 0x37;
+      0002C8 3E 37                  949 	ld	a, #0x37
+      0002CA E0r00                  950 	ldh	(_NR23_REG+0),a
+                                    951 ;gb-pong.c:165: NR24_REG = 0x87;
+      0002CC 3E 87                  952 	ld	a, #0x87
+      0002CE E0r00                  953 	ldh	(_NR24_REG+0),a
+                                    954 ;gb-pong.c:166: delay(180);
+      0002D0 C5                     955 	push	bc
+      0002D1 21 B4 00               956 	ld	hl, #0x00b4
+      0002D4 E5                     957 	push	hl
+      0002D5 CDr00r00               958 	call	_delay
+      0002D8 E8 02                  959 	add	sp, #2
+      0002DA C1                     960 	pop	bc
+                                    961 ;gb-pong.c:160: for(i = 0; i < 5; i++)
+      0002DB 03                     962 	inc	bc
+      0002DC 79                     963 	ld	a, c
+      0002DD D6 05                  964 	sub	a, #0x05
+      0002DF 78                     965 	ld	a, b
+      0002E0 17                     966 	rla
+      0002E1 3F                     967 	ccf
+      0002E2 1F                     968 	rra
+      0002E3 DE 80                  969 	sbc	a, #0x80
+      0002E5 38 D9                  970 	jr	C, 00183$
+                                    971 ;gb-pong.c:169: printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+      0002E7 21r63r05               972 	ld	hl, #___str_1
+      0002EA E5                     973 	push	hl
+      0002EB CDr00r00               974 	call	_puts
+      0002EE E8 02                  975 	add	sp, #2
+                                    976 ;gb-pong.c:170: printf(" %d               %d\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", yourScore, oppScore);
+      0002F0 F8 10                  977 	ldhl	sp,	#16
+      0002F2 2A                     978 	ld	a, (hl+)
+      0002F3 66                     979 	ld	h, (hl)
+      0002F4 6F                     980 	ld	l, a
+      0002F5 E5                     981 	push	hl
+      0002F6 F8 10                  982 	ldhl	sp,	#16
+      0002F8 2A                     983 	ld	a, (hl+)
+      0002F9 66                     984 	ld	h, (hl)
+      0002FA 6F                     985 	ld	l, a
+      0002FB E5                     986 	push	hl
+      0002FC 21r75r05               987 	ld	hl, #___str_2
+      0002FF E5                     988 	push	hl
+      000300 CDr00r00               989 	call	_printf
+      000303 E8 06                  990 	add	sp, #6
+      000305                        991 00121$:
+                                    992 ;gb-pong.c:174: if(bally < 20)
+      000305 F8 0C                  993 	ldhl	sp,	#12
+      000307 7E                     994 	ld	a, (hl)
+      000308 D6 14                  995 	sub	a, #0x14
+      00030A 23                     996 	inc	hl
+      00030B 7E                     997 	ld	a, (hl)
+      00030C DE 00                  998 	sbc	a, #0x00
+      00030E 56                     999 	ld	d, (hl)
+      00030F 3E 00                 1000 	ld	a, #0x00
+      000311 CB 7F                 1001 	bit	7,a
+      000313 28 07                 1002 	jr	Z, 00366$
+      000315 CB 7A                 1003 	bit	7, d
+      000317 20 08                 1004 	jr	NZ, 00367$
+      000319 BF                    1005 	cp	a, a
+      00031A 18 05                 1006 	jr	00367$
+      00031C                       1007 00366$:
+      00031C CB 7A                 1008 	bit	7, d
+      00031E 28 01                 1009 	jr	Z, 00367$
+      000320 37                    1010 	scf
+      000321                       1011 00367$:
+      000321 30 06                 1012 	jr	NC, 00125$
+                                   1013 ;gb-pong.c:176: ballUp = FALSE;
+      000323 AF                    1014 	xor	a, a
+      000324 F8 01                 1015 	ldhl	sp,	#1
+      000326 77                    1016 	ld	(hl), a
+      000327 18 22                 1017 	jr	00126$
+      000329                       1018 00125$:
+                                   1019 ;gb-pong.c:178: else if(bally > 140)
+      000329 F8 0C                 1020 	ldhl	sp,	#12
+      00032B 3E 8C                 1021 	ld	a, #0x8c
+      00032D 96                    1022 	sub	a, (hl)
+      00032E 23                    1023 	inc	hl
+      00032F 3E 00                 1024 	ld	a, #0x00
+      000331 9E                    1025 	sbc	a, (hl)
+      000332 3E 00                 1026 	ld	a, #0x00
+      000334 57                    1027 	ld	d, a
+      000335 CB 7E                 1028 	bit	7, (hl)
+      000337 28 07                 1029 	jr	Z, 00368$
+      000339 CB 7A                 1030 	bit	7, d
+      00033B 20 08                 1031 	jr	NZ, 00369$
+      00033D BF                    1032 	cp	a, a
+      00033E 18 05                 1033 	jr	00369$
+      000340                       1034 00368$:
+      000340 CB 7A                 1035 	bit	7, d
+      000342 28 01                 1036 	jr	Z, 00369$
+      000344 37                    1037 	scf
+      000345                       1038 00369$:
+      000345 30 04                 1039 	jr	NC, 00126$
+                                   1040 ;gb-pong.c:180: ballUp = TRUE;
+      000347 F8 01                 1041 	ldhl	sp,	#1
+      000349 36 01                 1042 	ld	(hl), #0x01
+      00034B                       1043 00126$:
+                                   1044 ;gb-pong.c:185: if (ballx > (95))
+      00034B F8 0A                 1045 	ldhl	sp,	#10
+      00034D 3E 5F                 1046 	ld	a, #0x5f
+      00034F 96                    1047 	sub	a, (hl)
+      000350 23                    1048 	inc	hl
+      000351 3E 00                 1049 	ld	a, #0x00
+      000353 9E                    1050 	sbc	a, (hl)
+      000354 3E 00                 1051 	ld	a, #0x00
+      000356 57                    1052 	ld	d, a
+      000357 CB 7E                 1053 	bit	7, (hl)
+      000359 28 07                 1054 	jr	Z, 00370$
+      00035B CB 7A                 1055 	bit	7, d
+      00035D 20 08                 1056 	jr	NZ, 00371$
+      00035F BF                    1057 	cp	a, a
+      000360 18 05                 1058 	jr	00371$
+      000362                       1059 00370$:
+      000362 CB 7A                 1060 	bit	7, d
+      000364 28 01                 1061 	jr	Z, 00371$
+      000366 37                    1062 	scf
+      000367                       1063 00371$:
+      000367 3E 00                 1064 	ld	a, #0x00
+      000369 17                    1065 	rla
+      00036A F8 04                 1066 	ldhl	sp,	#4
+      00036C 77                    1067 	ld	(hl), a
+                                   1068 ;gb-pong.c:187: oppy++;
+                                   1069 ;c
+      00036D F8 08                 1070 	ldhl	sp,#8
+      00036F 2A                    1071 	ld	a, (hl+)
+      000370 5F                    1072 	ld	e, a
+      000371 56                    1073 	ld	d, (hl)
+      000372 6B                    1074 	ld	l, e
+      000373 62                    1075 	ld	h, d
+      000374 23                    1076 	inc	hl
+      000375 E5                    1077 	push	hl
+      000376 7D                    1078 	ld	a, l
+      000377 F8 07                 1079 	ldhl	sp,	#7
+      000379 77                    1080 	ld	(hl), a
+      00037A E1                    1081 	pop	hl
+      00037B 7C                    1082 	ld	a, h
+      00037C F8 06                 1083 	ldhl	sp,	#6
+                                   1084 ;gb-pong.c:194: if (oppy < 75)
+      00037E 22                    1085 	ld	(hl+), a
+      00037F 23                    1086 	inc	hl
+      000380 7E                    1087 	ld	a, (hl)
+      000381 D6 4B                 1088 	sub	a, #0x4b
+      000383 23                    1089 	inc	hl
+      000384 7E                    1090 	ld	a, (hl)
+      000385 DE 00                 1091 	sbc	a, #0x00
+      000387 56                    1092 	ld	d, (hl)
+      000388 3E 00                 1093 	ld	a, #0x00
+      00038A CB 7F                 1094 	bit	7,a
+      00038C 28 07                 1095 	jr	Z, 00372$
+      00038E CB 7A                 1096 	bit	7, d
+      000390 20 08                 1097 	jr	NZ, 00373$
+      000392 BF                    1098 	cp	a, a
+      000393 18 05                 1099 	jr	00373$
+      000395                       1100 00372$:
+      000395 CB 7A                 1101 	bit	7, d
+      000397 28 01                 1102 	jr	Z, 00373$
+      000399 37                    1103 	scf
+      00039A                       1104 00373$:
+      00039A 3E 00                 1105 	ld	a, #0x00
+      00039C 17                    1106 	rla
+      00039D F8 07                 1107 	ldhl	sp,	#7
+      00039F 77                    1108 	ld	(hl), a
+                                   1109 ;gb-pong.c:183: if (bally > oppy)
+      0003A0 F8 08                 1110 	ldhl	sp,	#8
+      0003A2 5D                    1111 	ld	e, l
+      0003A3 54                    1112 	ld	d, h
+      0003A4 F8 0C                 1113 	ldhl	sp,	#12
+      0003A6 1A                    1114 	ld	a, (de)
+      0003A7 96                    1115 	sub	a, (hl)
+      0003A8 23                    1116 	inc	hl
+      0003A9 13                    1117 	inc	de
+      0003AA 1A                    1118 	ld	a, (de)
+      0003AB 9E                    1119 	sbc	a, (hl)
+      0003AC 1A                    1120 	ld	a, (de)
+      0003AD 57                    1121 	ld	d, a
+      0003AE CB 7E                 1122 	bit	7, (hl)
+      0003B0 28 07                 1123 	jr	Z, 00374$
+      0003B2 CB 7A                 1124 	bit	7, d
+      0003B4 20 08                 1125 	jr	NZ, 00375$
+      0003B6 BF                    1126 	cp	a, a
+      0003B7 18 05                 1127 	jr	00375$
+      0003B9                       1128 00374$:
+      0003B9 CB 7A                 1129 	bit	7, d
+      0003BB 28 01                 1130 	jr	Z, 00375$
+      0003BD 37                    1131 	scf
+      0003BE                       1132 00375$:
+      0003BE 30 79                 1133 	jr	NC, 00144$
+                                   1134 ;gb-pong.c:185: if (ballx > (95))
+      0003C0 F8 04                 1135 	ldhl	sp,	#4
+      0003C2 7E                    1136 	ld	a, (hl)
+      0003C3 B7                    1137 	or	a, a
+      0003C4 28 26                 1138 	jr	Z, 00132$
+                                   1139 ;gb-pong.c:187: oppy++;
+      0003C6 23                    1140 	inc	hl
+      0003C7 2A                    1141 	ld	a, (hl+)
+      0003C8 5E                    1142 	ld	e, (hl)
+      0003C9 23                    1143 	inc	hl
+      0003CA 23                    1144 	inc	hl
+      0003CB 22                    1145 	ld	(hl+), a
+                                   1146 ;gb-pong.c:188: move_sprite(2, oppx, oppy);
+      0003CC 7B                    1147 	ld	a, e
+      0003CD 32                    1148 	ld	(hl-), a
+      0003CE 3A                    1149 	ld	a, (hl-)
+      0003CF 77                    1150 	ld	(hl), a
+                                   1151 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+      0003D0 01r08r00              1152 	ld	bc, #(_shadow_OAM + 0x0008)
+                                   1153 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      0003D3 7E                    1154 	ld	a, (hl)
+      0003D4 02                    1155 	ld	(bc), a
+      0003D5 03                    1156 	inc	bc
+      0003D6 3E 96                 1157 	ld	a, #0x96
+      0003D8 02                    1158 	ld	(bc), a
+                                   1159 ;gb-pong.c:189: move_sprite(3, oppx, oppy+16);
+      0003D9 23                    1160 	inc	hl
+      0003DA 3A                    1161 	ld	a, (hl-)
+      0003DB 77                    1162 	ld	(hl), a
+      0003DC 7E                    1163 	ld	a, (hl)
+      0003DD C6 10                 1164 	add	a, #0x10
+      0003DF 77                    1165 	ld	(hl), a
+                                   1166 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+      0003E0 01r0Cr00              1167 	ld	bc, #(_shadow_OAM + 0x000c)
+                                   1168 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      0003E3 7E                    1169 	ld	a, (hl)
+      0003E4 02                    1170 	ld	(bc), a
+      0003E5 03                    1171 	inc	bc
+      0003E6 3E 96                 1172 	ld	a, #0x96
+      0003E8 02                    1173 	ld	(bc), a
+                                   1174 ;gb-pong.c:189: move_sprite(3, oppx, oppy+16);
+      0003E9 C3rC8r04              1175 	jp	00145$
+      0003EC                       1176 00132$:
+                                   1177 ;gb-pong.c:194: if (oppy < 75)
+      0003EC F8 07                 1178 	ldhl	sp,	#7
+      0003EE 7E                    1179 	ld	a, (hl)
+      0003EF B7                    1180 	or	a, a
+      0003F0 28 08                 1181 	jr	Z, 00128$
+                                   1182 ;gb-pong.c:196: oppy++;
+      0003F2 2B                    1183 	dec	hl
+      0003F3 2B                    1184 	dec	hl
+      0003F4 2A                    1185 	ld	a, (hl+)
+      0003F5 5E                    1186 	ld	e, (hl)
+      0003F6 23                    1187 	inc	hl
+      0003F7 23                    1188 	inc	hl
+      0003F8 22                    1189 	ld	(hl+), a
+      0003F9 73                    1190 	ld	(hl), e
+      0003FA                       1191 00128$:
+                                   1192 ;gb-pong.c:199: if (oppy > 75)
+      0003FA F8 08                 1193 	ldhl	sp,	#8
+      0003FC 3E 4B                 1194 	ld	a, #0x4b
+      0003FE 96                    1195 	sub	a, (hl)
+      0003FF 23                    1196 	inc	hl
+      000400 3E 00                 1197 	ld	a, #0x00
+      000402 9E                    1198 	sbc	a, (hl)
+      000403 3E 00                 1199 	ld	a, #0x00
+      000405 57                    1200 	ld	d, a
+      000406 CB 7E                 1201 	bit	7, (hl)
+      000408 28 07                 1202 	jr	Z, 00376$
+      00040A CB 7A                 1203 	bit	7, d
+      00040C 20 08                 1204 	jr	NZ, 00377$
+      00040E BF                    1205 	cp	a, a
+      00040F 18 05                 1206 	jr	00377$
+      000411                       1207 00376$:
+      000411 CB 7A                 1208 	bit	7, d
+      000413 28 01                 1209 	jr	Z, 00377$
+      000415 37                    1210 	scf
+      000416                       1211 00377$:
+      000416 30 0A                 1212 	jr	NC, 00130$
+                                   1213 ;gb-pong.c:201: oppy--;
+      000418 F8 08                 1214 	ldhl	sp,#8
+      00041A 2A                    1215 	ld	a, (hl+)
+      00041B 5F                    1216 	ld	e, a
+      00041C 56                    1217 	ld	d, (hl)
+      00041D 1B                    1218 	dec	de
+      00041E 2B                    1219 	dec	hl
+      00041F 7B                    1220 	ld	a, e
+      000420 22                    1221 	ld	(hl+), a
+      000421 72                    1222 	ld	(hl), d
+      000422                       1223 00130$:
+                                   1224 ;gb-pong.c:204: move_sprite(2, oppx, oppy);
+      000422 F8 08                 1225 	ldhl	sp,	#8
+                                   1226 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+                                   1227 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      000424 7E                    1228 	ld	a, (hl)
+      000425 21r08r00              1229 	ld	hl, #(_shadow_OAM + 0x0008)
+      000428 22                    1230 	ld	(hl+), a
+      000429 36 96                 1231 	ld	(hl), #0x96
+                                   1232 ;gb-pong.c:205: move_sprite(3, oppx, oppy+16);
+      00042B F8 08                 1233 	ldhl	sp,	#8
+      00042D 7E                    1234 	ld	a, (hl)
+      00042E C6 10                 1235 	add	a, #0x10
+                                   1236 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+                                   1237 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      000430 21r0Cr00              1238 	ld	hl, #(_shadow_OAM + 0x000c)
+      000433 22                    1239 	ld	(hl+), a
+      000434 36 96                 1240 	ld	(hl), #0x96
+                                   1241 ;gb-pong.c:205: move_sprite(3, oppx, oppy+16);
+      000436 C3rC8r04              1242 	jp	00145$
+      000439                       1243 00144$:
+                                   1244 ;gb-pong.c:208: else if (bally < oppy)
+      000439 F8 0C                 1245 	ldhl	sp,	#12
+      00043B 5D                    1246 	ld	e, l
+      00043C 54                    1247 	ld	d, h
+      00043D F8 08                 1248 	ldhl	sp,	#8
+      00043F 1A                    1249 	ld	a, (de)
+      000440 96                    1250 	sub	a, (hl)
+      000441 23                    1251 	inc	hl
+      000442 13                    1252 	inc	de
+      000443 1A                    1253 	ld	a, (de)
+      000444 9E                    1254 	sbc	a, (hl)
+      000445 1A                    1255 	ld	a, (de)
+      000446 57                    1256 	ld	d, a
+      000447 CB 7E                 1257 	bit	7, (hl)
+      000449 28 07                 1258 	jr	Z, 00378$
+      00044B CB 7A                 1259 	bit	7, d
+      00044D 20 08                 1260 	jr	NZ, 00379$
+      00044F BF                    1261 	cp	a, a
+      000450 18 05                 1262 	jr	00379$
+      000452                       1263 00378$:
+      000452 CB 7A                 1264 	bit	7, d
+      000454 28 01                 1265 	jr	Z, 00379$
+      000456 37                    1266 	scf
+      000457                       1267 00379$:
+      000457 30 6F                 1268 	jr	NC, 00145$
+                                   1269 ;gb-pong.c:210: if (ballx > (95))
+      000459 F8 04                 1270 	ldhl	sp,	#4
+      00045B 7E                    1271 	ld	a, (hl)
+      00045C B7                    1272 	or	a, a
+      00045D 28 1F                 1273 	jr	Z, 00139$
+                                   1274 ;gb-pong.c:212: oppy--;
+      00045F F8 08                 1275 	ldhl	sp,#8
+      000461 2A                    1276 	ld	a, (hl+)
+      000462 5F                    1277 	ld	e, a
+      000463 56                    1278 	ld	d, (hl)
+      000464 1B                    1279 	dec	de
+      000465 2B                    1280 	dec	hl
+      000466 7B                    1281 	ld	a, e
+      000467 22                    1282 	ld	(hl+), a
+                                   1283 ;gb-pong.c:213: move_sprite(2, oppx, oppy);
+      000468 7A                    1284 	ld	a, d
+      000469 32                    1285 	ld	(hl-), a
+                                   1286 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+                                   1287 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      00046A 7E                    1288 	ld	a, (hl)
+      00046B 21r08r00              1289 	ld	hl, #(_shadow_OAM + 0x0008)
+      00046E 22                    1290 	ld	(hl+), a
+      00046F 36 96                 1291 	ld	(hl), #0x96
+                                   1292 ;gb-pong.c:214: move_sprite(3, oppx, oppy+16);
+      000471 F8 08                 1293 	ldhl	sp,	#8
+      000473 7E                    1294 	ld	a, (hl)
+      000474 C6 10                 1295 	add	a, #0x10
+                                   1296 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+                                   1297 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      000476 21r0Cr00              1298 	ld	hl, #(_shadow_OAM + 0x000c)
+      000479 22                    1299 	ld	(hl+), a
+      00047A 36 96                 1300 	ld	(hl), #0x96
+                                   1301 ;gb-pong.c:214: move_sprite(3, oppx, oppy+16);
+      00047C 18 4A                 1302 	jr	00145$
+      00047E                       1303 00139$:
+                                   1304 ;gb-pong.c:219: if (oppy < 75)
+      00047E F8 07                 1305 	ldhl	sp,	#7
+      000480 7E                    1306 	ld	a, (hl)
+      000481 B7                    1307 	or	a, a
+      000482 28 08                 1308 	jr	Z, 00135$
+                                   1309 ;gb-pong.c:221: oppy++;
+      000484 2B                    1310 	dec	hl
+      000485 2B                    1311 	dec	hl
+      000486 2A                    1312 	ld	a, (hl+)
+      000487 5E                    1313 	ld	e, (hl)
+      000488 23                    1314 	inc	hl
+      000489 23                    1315 	inc	hl
+      00048A 22                    1316 	ld	(hl+), a
+      00048B 73                    1317 	ld	(hl), e
+      00048C                       1318 00135$:
+                                   1319 ;gb-pong.c:224: if (oppy > 75)
+      00048C F8 08                 1320 	ldhl	sp,	#8
+      00048E 3E 4B                 1321 	ld	a, #0x4b
+      000490 96                    1322 	sub	a, (hl)
+      000491 23                    1323 	inc	hl
+      000492 3E 00                 1324 	ld	a, #0x00
+      000494 9E                    1325 	sbc	a, (hl)
+      000495 3E 00                 1326 	ld	a, #0x00
+      000497 57                    1327 	ld	d, a
+      000498 CB 7E                 1328 	bit	7, (hl)
+      00049A 28 07                 1329 	jr	Z, 00380$
+      00049C CB 7A                 1330 	bit	7, d
+      00049E 20 08                 1331 	jr	NZ, 00381$
+      0004A0 BF                    1332 	cp	a, a
+      0004A1 18 05                 1333 	jr	00381$
+      0004A3                       1334 00380$:
+      0004A3 CB 7A                 1335 	bit	7, d
+      0004A5 28 01                 1336 	jr	Z, 00381$
+      0004A7 37                    1337 	scf
+      0004A8                       1338 00381$:
+      0004A8 30 0A                 1339 	jr	NC, 00137$
+                                   1340 ;gb-pong.c:226: oppy--;
+      0004AA F8 08                 1341 	ldhl	sp,#8
+      0004AC 2A                    1342 	ld	a, (hl+)
+      0004AD 5F                    1343 	ld	e, a
+      0004AE 56                    1344 	ld	d, (hl)
+      0004AF 1B                    1345 	dec	de
+      0004B0 2B                    1346 	dec	hl
+      0004B1 7B                    1347 	ld	a, e
+      0004B2 22                    1348 	ld	(hl+), a
+      0004B3 72                    1349 	ld	(hl), d
+      0004B4                       1350 00137$:
+                                   1351 ;gb-pong.c:229: move_sprite(2, oppx, oppy);
+      0004B4 F8 08                 1352 	ldhl	sp,	#8
+                                   1353 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+                                   1354 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      0004B6 7E                    1355 	ld	a, (hl)
+      0004B7 21r08r00              1356 	ld	hl, #(_shadow_OAM + 0x0008)
+      0004BA 22                    1357 	ld	(hl+), a
+      0004BB 36 96                 1358 	ld	(hl), #0x96
+                                   1359 ;gb-pong.c:230: move_sprite(3, oppx, oppy+16);
+      0004BD F8 08                 1360 	ldhl	sp,	#8
+      0004BF 7E                    1361 	ld	a, (hl)
+      0004C0 C6 10                 1362 	add	a, #0x10
+                                   1363 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+                                   1364 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      0004C2 21r0Cr00              1365 	ld	hl, #(_shadow_OAM + 0x000c)
+      0004C5 22                    1366 	ld	(hl+), a
+      0004C6 36 96                 1367 	ld	(hl), #0x96
+                                   1368 ;gb-pong.c:230: move_sprite(3, oppx, oppy+16);
+      0004C8                       1369 00145$:
+                                   1370 ;gb-pong.c:234: if(joypad() == J_UP && y > 20)
+      0004C8 CDr00r00              1371 	call	_joypad
+      0004CB 7B                    1372 	ld	a, e
+      0004CC D6 04                 1373 	sub	a, #0x04
+      0004CE 20 40                 1374 	jr	NZ, 00147$
+      0004D0 F8 02                 1375 	ldhl	sp,	#2
+      0004D2 3E 14                 1376 	ld	a, #0x14
+      0004D4 96                    1377 	sub	a, (hl)
+      0004D5 23                    1378 	inc	hl
+      0004D6 3E 00                 1379 	ld	a, #0x00
+      0004D8 9E                    1380 	sbc	a, (hl)
+      0004D9 3E 00                 1381 	ld	a, #0x00
+      0004DB 57                    1382 	ld	d, a
+      0004DC CB 7E                 1383 	bit	7, (hl)
+      0004DE 28 07                 1384 	jr	Z, 00384$
+      0004E0 CB 7A                 1385 	bit	7, d
+      0004E2 20 08                 1386 	jr	NZ, 00385$
+      0004E4 BF                    1387 	cp	a, a
+      0004E5 18 05                 1388 	jr	00385$
+      0004E7                       1389 00384$:
+      0004E7 CB 7A                 1390 	bit	7, d
+      0004E9 28 01                 1391 	jr	Z, 00385$
+      0004EB 37                    1392 	scf
+      0004EC                       1393 00385$:
+      0004EC 30 22                 1394 	jr	NC, 00147$
+                                   1395 ;gb-pong.c:236: y--;
+      0004EE F8 02                 1396 	ldhl	sp,#2
+      0004F0 2A                    1397 	ld	a, (hl+)
+      0004F1 4F                    1398 	ld	c, a
+      0004F2 46                    1399 	ld	b, (hl)
+      0004F3 0B                    1400 	dec	bc
+                                   1401 ;gb-pong.c:237: y--;
+      0004F4 11 01 00              1402 	ld	de, #0x0001
+      0004F7 79                    1403 	ld	a, c
+      0004F8 93                    1404 	sub	a, e
+      0004F9 5F                    1405 	ld	e, a
+      0004FA 78                    1406 	ld	a, b
+      0004FB 9A                    1407 	sbc	a, d
+      0004FC 32                    1408 	ld	(hl-), a
+      0004FD 73                    1409 	ld	(hl), e
+                                   1410 ;gb-pong.c:238: move_sprite(0, x, y);
+                                   1411 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+                                   1412 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      0004FE 7E                    1413 	ld	a, (hl)
+      0004FF 21r00r00              1414 	ld	hl, #_shadow_OAM
+      000502 22                    1415 	ld	(hl+), a
+      000503 36 0F                 1416 	ld	(hl), #0x0f
+                                   1417 ;gb-pong.c:239: move_sprite(1, x, y+16);
+      000505 F8 02                 1418 	ldhl	sp,	#2
+      000507 7E                    1419 	ld	a, (hl)
+      000508 C6 10                 1420 	add	a, #0x10
+                                   1421 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+                                   1422 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      00050A 21r04r00              1423 	ld	hl, #(_shadow_OAM + 0x0004)
+      00050D 22                    1424 	ld	(hl+), a
+      00050E 36 0F                 1425 	ld	(hl), #0x0f
+                                   1426 ;gb-pong.c:239: move_sprite(1, x, y+16);
+      000510                       1427 00147$:
+                                   1428 ;gb-pong.c:242: if(joypad() == J_DOWN && y < 120)
+      000510 CDr00r00              1429 	call	_joypad
+      000513 7B                    1430 	ld	a, e
+      000514 D6 08                 1431 	sub	a, #0x08
+      000516 20 3C                 1432 	jr	NZ, 00150$
+      000518 F8 02                 1433 	ldhl	sp,	#2
+      00051A 7E                    1434 	ld	a, (hl)
+      00051B D6 78                 1435 	sub	a, #0x78
+      00051D 23                    1436 	inc	hl
+      00051E 7E                    1437 	ld	a, (hl)
+      00051F DE 00                 1438 	sbc	a, #0x00
+      000521 56                    1439 	ld	d, (hl)
+      000522 3E 00                 1440 	ld	a, #0x00
+      000524 CB 7F                 1441 	bit	7,a
+      000526 28 07                 1442 	jr	Z, 00388$
+      000528 CB 7A                 1443 	bit	7, d
+      00052A 20 08                 1444 	jr	NZ, 00389$
+      00052C BF                    1445 	cp	a, a
+      00052D 18 05                 1446 	jr	00389$
+      00052F                       1447 00388$:
+      00052F CB 7A                 1448 	bit	7, d
+      000531 28 01                 1449 	jr	Z, 00389$
+      000533 37                    1450 	scf
+      000534                       1451 00389$:
+      000534 30 1E                 1452 	jr	NC, 00150$
+                                   1453 ;gb-pong.c:244: y++;
+      000536 F8 02                 1454 	ldhl	sp,#2
+      000538 2A                    1455 	ld	a, (hl+)
+      000539 4F                    1456 	ld	c, a
+      00053A 46                    1457 	ld	b, (hl)
+      00053B 03                    1458 	inc	bc
+                                   1459 ;gb-pong.c:245: y++;
+      00053C 03                    1460 	inc	bc
+      00053D 2B                    1461 	dec	hl
+      00053E 79                    1462 	ld	a, c
+      00053F 22                    1463 	ld	(hl+), a
+                                   1464 ;gb-pong.c:246: move_sprite(0, x, y);
+      000540 78                    1465 	ld	a, b
+      000541 32                    1466 	ld	(hl-), a
+                                   1467 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+                                   1468 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      000542 7E                    1469 	ld	a, (hl)
+      000543 21r00r00              1470 	ld	hl, #_shadow_OAM
+      000546 22                    1471 	ld	(hl+), a
+      000547 36 0F                 1472 	ld	(hl), #0x0f
+                                   1473 ;gb-pong.c:247: move_sprite(1, x, y+16);
+      000549 F8 02                 1474 	ldhl	sp,	#2
+      00054B 7E                    1475 	ld	a, (hl)
+      00054C C6 10                 1476 	add	a, #0x10
+                                   1477 ;c:/gbdk/include/gb/gb.h:1077: OAM_item_t * itm = &shadow_OAM[nb];
+                                   1478 ;c:/gbdk/include/gb/gb.h:1078: itm->y=y, itm->x=x;
+      00054E 21r04r00              1479 	ld	hl, #(_shadow_OAM + 0x0004)
+      000551 22                    1480 	ld	(hl+), a
+      000552 36 0F                 1481 	ld	(hl), #0x0f
+                                   1482 ;gb-pong.c:247: move_sprite(1, x, y+16);
+      000554                       1483 00150$:
+                                   1484 ;gb-pong.c:250: delay(15);
+      000554 21 0F 00              1485 	ld	hl, #0x000f
+      000557 E5                    1486 	push	hl
+      000558 CDr00r00              1487 	call	_delay
+      00055B E8 02                 1488 	add	sp, #2
+      00055D C3rC4r00              1489 	jp	00153$
+                                   1490 ;gb-pong.c:252: }
+      000560 E8 12                 1491 	add	sp, #18
+      000562 C9                    1492 	ret
+      000563                       1493 ___str_1:
+      000563 0A                    1494 	.db 0x0a
+      000564 0A                    1495 	.db 0x0a
+      000565 0A                    1496 	.db 0x0a
+      000566 0A                    1497 	.db 0x0a
+      000567 0A                    1498 	.db 0x0a
+      000568 0A                    1499 	.db 0x0a
+      000569 0A                    1500 	.db 0x0a
+      00056A 0A                    1501 	.db 0x0a
+      00056B 0A                    1502 	.db 0x0a
+      00056C 0A                    1503 	.db 0x0a
+      00056D 0A                    1504 	.db 0x0a
+      00056E 0A                    1505 	.db 0x0a
+      00056F 0A                    1506 	.db 0x0a
+      000570 0A                    1507 	.db 0x0a
+      000571 0A                    1508 	.db 0x0a
+      000572 0A                    1509 	.db 0x0a
+      000573 0A                    1510 	.db 0x0a
+      000574 00                    1511 	.db 0x00
+      000575                       1512 ___str_2:
+      000575 20 25 64 20 20 20 20  1513 	.ascii " %d               %d"
+             20 20 20 20 20 20 20
+             20 20 20 20 25 64
+      000589 0A                    1514 	.db 0x0a
+      00058A 0A                    1515 	.db 0x0a
+      00058B 0A                    1516 	.db 0x0a
+      00058C 0A                    1517 	.db 0x0a
+      00058D 0A                    1518 	.db 0x0a
+      00058E 0A                    1519 	.db 0x0a
+      00058F 0A                    1520 	.db 0x0a
+      000590 0A                    1521 	.db 0x0a
+      000591 0A                    1522 	.db 0x0a
+      000592 0A                    1523 	.db 0x0a
+      000593 0A                    1524 	.db 0x0a
+      000594 0A                    1525 	.db 0x0a
+      000595 0A                    1526 	.db 0x0a
+      000596 0A                    1527 	.db 0x0a
+      000597 0A                    1528 	.db 0x0a
+      000598 0A                    1529 	.db 0x0a
+      000599 0A                    1530 	.db 0x0a
+      00059A 00                    1531 	.db 0x00
+                                   1532 	.area _CODE
+                                   1533 	.area _CABS (ABS)
