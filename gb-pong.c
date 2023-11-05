@@ -3,6 +3,8 @@
 #include <gb/gb.h>
 #include "sprites.c"
 
+void updateScore(int yourScore, int oppScore);
+
 void main()
 {    
     NR52_REG = 0x80;
@@ -11,16 +13,15 @@ void main()
     
     int yourScore = 0;
     int oppScore = 0;
-    printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-    printf(" %d               %d\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", yourScore, oppScore);
+    updateScore(yourScore, oppScore);
 
     bool ballRight = TRUE;
     bool ballUp = TRUE;
     
-    int x = 15;
+    int x = 12;
     int y = 75;
 
-    int oppx = 150;
+    int oppx = 156;
     int oppy = 75;
 
     int ballx = 85;
@@ -98,8 +99,7 @@ void main()
                     delay(180);
                 }
 
-                printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-                printf(" %d               %d\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", yourScore, oppScore);
+                updateScore(yourScore, oppScore);
             }
         }
         else if(ballx < x + 6)
@@ -131,8 +131,7 @@ void main()
                     delay(180);
                 }
                 
-                printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-                printf(" %d               %d\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", yourScore, oppScore);
+                updateScore(yourScore, oppScore);
             }
         }
 
@@ -214,4 +213,10 @@ void main()
         }
         delay(15);
     }
+}
+
+void updateScore(int yourScore, int oppScore)
+{
+    printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+    printf(" %d               %d\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", yourScore, oppScore);
 }
